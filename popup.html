@@ -92,30 +92,96 @@
       background-color: #e9ecef;
       border-color: #adb5bd;
     }
+    .saved-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 5px;
+      min-height: 30px;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 8px;
+      background-color: #f8f9fa;
+    }
+    .tag-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      background-color: white;
+      cursor: pointer;
+      font-size: 12px;
+      color: #495057;
+      transition: all 0.2s;
+    }
+    .tag-item:hover {
+      background-color: #e3f2fd;
+      border-color: #2196F3;
+    }
+    .tag-item.active {
+      background-color: #2196F3;
+      color: white;
+      border-color: #1976D2;
+    }
+    .tag-item .tag-name {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    .tag-item .tag-selector {
+      font-size: 10px;
+      opacity: 0.8;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tag-item .delete-btn {
+      margin-left: 8px;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      opacity: 0.7;
+    }
+    .tag-item .delete-btn:hover {
+      opacity: 1;
+    }
+    .empty-tags {
+      color: #6c757d;
+      font-style: italic;
+      font-size: 12px;
+      text-align: center;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <h3>图片复制器</h3>
   
   <div class="input-group">
-    <label for="classSelector">DOM节点选择器:</label>
-    <input type="text" id="classSelector" placeholder='例如: [data-testid="canvas_panel_container"][data-visible="true"]'>
+    <label for="tagName">标签名称:</label>
+    <input type="text" id="tagName" placeholder="例如: Canvas面板">
   </div>
   
   <div class="input-group">
-    <label>常用选择器示例:</label>
-    <div class="examples">
-      <button class="example-btn" data-selector='[data-testid="canvas_panel_container"][data-visible="true"]'>Canvas面板</button>
-      <button class="example-btn" data-selector='.image-gallery img'>图片画廊</button>
-      <button class="example-btn" data-selector='img.thumbnail'>缩略图</button>
-      <button class="example-btn" data-selector='[role="img"]'>角色图片</button>
+    <label for="classSelector">DOM节点选择器:</label>
+    <input type="text" id="classSelector" placeholder='例如: div[data-testid="canvas_panel_container"][data-visible="true"] img'>
+  </div>
+  
+  <button id="saveTag" class="button save-button">保存标签</button>
+  
+  <div class="input-group">
+    <label>已保存的标签:</label>
+    <div id="savedTags" class="saved-tags">
+      <!-- 保存的标签会显示在这里 -->
     </div>
   </div>
   
-  <button id="saveSettings" class="button save-button">保存设置</button>
-  
   <div id="currentSetting" class="current-setting" style="display: none;">
-    <strong>当前设置:</strong> <span id="currentSelector"></span>
+    <strong>当前选择:</strong> <span id="currentSelector"></span>
   </div>
   
   <button id="copyImage" class="button copy-button" disabled>复制图片</button>

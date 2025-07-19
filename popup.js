@@ -1,56 +1,61 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const tagNameInput = document.getElementById("tagName");
   const classSelectorInput = document.getElementById("classSelector");
-  const saveSettingsBtn = document.getElementById("saveSettings");
+  const saveTagBtn = document.getElementById("saveTag");
   const copyImageBtn = document.getElementById("copyImage");
   const statusDiv = document.getElementById("status");
   const currentSettingDiv = document.getElementById("currentSetting");
   const currentSelectorSpan = document.getElementById("currentSelector");
+  const savedTagsDiv = document.getElementById("savedTags");
 
-  // 加载保存的设置
-  loadSettings();
+  let currentSelectedTag = null;
 
-  // 示例按钮点击事件
-  document.querySelectorAll(".example-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const selector = this.getAttribute("data-selector");
-      classSelectorInput.value = selector;
-    });
-  });
+  // 加载保存的标签
+  loadSavedTags();
 
-  // 保存设置
-  saveSettingsBtn.addEventListener("click", async function () {
-    console.log("保存按钮被点击");
+  // 保存标签
+  saveTagBtn.addEventListener("click", async function () {
+    const tagName = tagNameInput.value.trim();
     const selector = classSelectorInput.value.trim();
-    console.log("输入的选择器:", selector);
+
+    if (!tagName) {
+      showStatus("请输入标签名称", "error");
+      return;
+    }
 
     if (!selector) {
-      showStatus("请输入CSS选择器", "error");
+      showStatus("请输入DOM节点选择器", "error");
       return;
     }
 
     try {
-      // 检查chrome.storage是否可用
-      if (
-        typeof chrome !== "undefined" &&
-        chrome.storage &&
-        chrome.storage.sync
-      ) {
-        // 保存到chrome storage
-        await chrome.storage.sync.set({ imageSelector: selector });
-        console.log("设置已保存到chrome storage");
+      // 获取现有标签
+      const savedTags = await getSavedTags();
+
+      // 检查是否已存在相同名称的标签
+      const existingIndex = savedTags.findIndex((tag) => tag.name === tagName);
+
+      if (existingIndex >= 0) {
+        // 更新现有标签
+        savedTags[existingIndex] = { name: tagName, selector: selector };
+        showStatus(`标签 "${tagName}" 已更新`, "success");
       } else {
-        // 备用方案：使用localStorage
-        localStorage.setItem("imageSelector", selector);
-        console.log("设置已保存到localStorage");
+        // 添加新标签
+        savedTags.push({ name: tagName, selector: selector });
+        showStatus(`标签 "${tagName}" 已保存`, "success");
       }
 
-      // 更新UI
-      updateCurrentSetting(selector);
-      copyImageBtn.disabled = false;
+      // 保存到存储
+      await saveTags(savedTags);
 
-      showStatus("设置已保存", "success");
+      // 重新加载标签显示
+      loadSavedTags();
+
+      // 清空输入框
+      tagNameInput.value = "";
+      classSelectorInput.value = "";
     } catch (error) {
-      console.error("保存设置时出错:", error);
+      console.error("保存标签时出错:", error);
       showStatus("保存失败: " + error.message, "error");
     }
   });
@@ -59,26 +64,29 @@ document.addEventListener("DOMContentLoaded", function () {
   copyImageBtn.addEventListener("click", async function () {
     let selector;
 
-    try {
-      // 尝试从chrome storage获取设置
-      if (
-        typeof chrome !== "undefined" &&
-        chrome.storage &&
-        chrome.storage.sync
-      ) {
-        const settings = await chrome.storage.sync.get(["imageSelector"]);
-        selector = settings.imageSelector;
-      } else {
-        // 备用方案：从localStorage获取
+    // 如果有选中的标签，使用标签的选择器
+    if (currentSelectedTag) {
+      selector = currentSelectedTag.selector;
+    } else {
+      // 否则尝试从存储获取
+      try {
+        if (
+          typeof chrome !== "undefined" &&
+          chrome.storage &&
+          chrome.storage.sync
+        ) {
+          const settings = await chrome.storage.sync.get(["imageSelector"]);
+          selector = settings.imageSelector;
+        } else {
+          selector = localStorage.getItem("imageSelector");
+        }
+      } catch (error) {
         selector = localStorage.getItem("imageSelector");
       }
-    } catch (error) {
-      // 如果chrome storage失败，尝试localStorage
-      selector = localStorage.getItem("imageSelector");
     }
 
     if (!selector) {
-      showStatus("请先设置CSS选择器", "error");
+      showStatus("请先选择一个标签或设置CSS选择器", "error");
       return;
     }
 
@@ -311,6 +319,127 @@ document.addEventListener("DOMContentLoaded", function () {
       updateCurrentSetting(selector);
       copyImageBtn.disabled = false;
     }
+  }
+
+  // 更新当前设置显示
+  function updateCurrentSetting(selector) {
+    currentSelectorSpan.textContent = selector;
+    currentSettingDiv.style.display = "block";
+  }
+
+  // 获取保存的标签
+  async function getSavedTags() {
+    try {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.sync
+      ) {
+        const result = await chrome.storage.sync.get(["savedTags"]);
+        return result.savedTags || [];
+      } else {
+        const tags = localStorage.getItem("savedTags");
+        return tags ? JSON.parse(tags) : [];
+      }
+    } catch (error) {
+      console.error("获取标签失败:", error);
+      const tags = localStorage.getItem("savedTags");
+      return tags ? JSON.parse(tags) : [];
+    }
+  }
+
+  // 保存标签到存储
+  async function saveTags(tags) {
+    try {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.sync
+      ) {
+        await chrome.storage.sync.set({ savedTags: tags });
+      } else {
+        localStorage.setItem("savedTags", JSON.stringify(tags));
+      }
+    } catch (error) {
+      console.error("保存标签失败:", error);
+      localStorage.setItem("savedTags", JSON.stringify(tags));
+    }
+  }
+
+  // 加载并显示保存的标签
+  async function loadSavedTags() {
+    const tags = await getSavedTags();
+    displayTags(tags);
+  }
+
+  // 显示标签
+  function displayTags(tags) {
+    savedTagsDiv.innerHTML = "";
+
+    if (tags.length === 0) {
+      savedTagsDiv.innerHTML = '<div class="empty-tags">暂无保存的标签</div>';
+      return;
+    }
+
+    tags.forEach((tag, index) => {
+      const tagElement = document.createElement("div");
+      tagElement.className = "tag-item";
+      tagElement.innerHTML = `
+        <span class="tag-name">${tag.name}</span>
+        <span class="tag-selector">${tag.selector}</span>
+        <button class="delete-btn" title="删除标签">×</button>
+      `;
+
+      // 点击标签选择
+      tagElement.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-btn")) {
+          return; // 如果点击的是删除按钮，不执行选择逻辑
+        }
+
+        // 移除其他标签的选中状态
+        document.querySelectorAll(".tag-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        // 选中当前标签
+        tagElement.classList.add("active");
+        currentSelectedTag = tag;
+
+        // 更新当前设置显示
+        updateCurrentSetting(tag.selector);
+        copyImageBtn.disabled = false;
+
+        showStatus(`已选择标签: ${tag.name}`, "success");
+      });
+
+      // 删除标签
+      const deleteBtn = tagElement.querySelector(".delete-btn");
+      deleteBtn.addEventListener("click", async function (e) {
+        e.stopPropagation();
+
+        if (confirm(`确定要删除标签 "${tag.name}" 吗？`)) {
+          try {
+            const updatedTags = tags.filter((_, i) => i !== index);
+            await saveTags(updatedTags);
+            loadSavedTags();
+
+            // 如果删除的是当前选中的标签，清除选中状态
+            if (currentSelectedTag && currentSelectedTag.name === tag.name) {
+              currentSelectedTag = null;
+              currentSettingDiv.style.display = "none";
+              copyImageBtn.disabled = true;
+            }
+
+            showStatus(`标签 "${tag.name}" 已删除`, "success");
+          } catch (error) {
+            console.error("删除标签失败:", error);
+            showStatus("删除失败: " + error.message, "error");
+          }
+        }
+      });
+
+      savedTagsDiv.appendChild(tagElement);
+    });
   }
 
   // 更新当前设置显示

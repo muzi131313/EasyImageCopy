@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
       showStatus("正在查找和复制图片...", "success");
       console.log("开始处理复制请求，选择器:", selector);
 
-      // 直接注入代码到页面执行
+      // 第一步：在页面中查找图片并获取图片数据
       const [result] = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         function: async function (selector) {
@@ -154,12 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
               };
             }
 
-            console.log("开始下载和复制图片:", imgSrc);
-
-            // 检查剪贴板API是否可用
-            if (!navigator.clipboard) {
-              return { success: false, error: "浏览器不支持剪贴板API" };
-            }
+            console.log("开始下载图片:", imgSrc);
 
             // 获取图片数据
             const response = await fetch(imgSrc);
@@ -193,69 +188,25 @@ document.addEventListener("DOMContentLoaded", function () {
               }, 3000);
             }
 
-            // 复制到剪贴板 - 使用用户交互触发的方式
-            console.log("开始复制到剪贴板...");
-
-            // 创建一个临时按钮来触发用户交互
-            const copyButton = document.createElement("button");
-            copyButton.textContent = "点击复制图片";
-            copyButton.style.position = "fixed";
-            copyButton.style.top = "50%";
-            copyButton.style.left = "50%";
-            copyButton.style.transform = "translate(-50%, -50%)";
-            copyButton.style.zIndex = "10000";
-            copyButton.style.padding = "20px";
-            copyButton.style.fontSize = "16px";
-            copyButton.style.backgroundColor = "#4CAF50";
-            copyButton.style.color = "white";
-            copyButton.style.border = "none";
-            copyButton.style.borderRadius = "5px";
-            copyButton.style.cursor = "pointer";
-            copyButton.style.boxShadow = "0 4px 8px rgba(0,0,0,0.3)";
-
-            // 添加按钮到页面
-            document.body.appendChild(copyButton);
-
-            // 返回一个Promise，等待用户点击
+            // 将blob转换为base64，以便传回popup
+            const reader = new FileReader();
             return new Promise((resolve) => {
-              copyButton.onclick = async () => {
-                try {
-                  await navigator.clipboard.write([
-                    new ClipboardItem({
-                      [blob.type]: blob,
-                    }),
-                  ]);
-
-                  console.log("图片已成功复制到剪贴板");
-
-                  // 移除按钮
-                  document.body.removeChild(copyButton);
-
-                  resolve({
-                    success: true,
-                    count: elements.length,
-                    src: imgSrc,
-                  });
-                } catch (error) {
-                  console.error("复制失败:", error);
-                  document.body.removeChild(copyButton);
-                  resolve({
-                    success: false,
-                    error: "复制到剪贴板失败: " + error.message,
-                  });
-                }
+              reader.onload = function () {
+                resolve({
+                  success: true,
+                  count: elements.length,
+                  src: imgSrc,
+                  imageData: reader.result,
+                  mimeType: blob.type,
+                });
               };
-
-              // 10秒后自动移除按钮
-              setTimeout(() => {
-                if (document.body.contains(copyButton)) {
-                  document.body.removeChild(copyButton);
-                  resolve({
-                    success: false,
-                    error: "用户未点击复制按钮，操作超时",
-                  });
-                }
-              }, 10000);
+              reader.onerror = function () {
+                resolve({
+                  success: false,
+                  error: "无法读取图片数据",
+                });
+              };
+              reader.readAsDataURL(blob);
             });
           } catch (error) {
             console.error("页面脚本执行出错:", error);
@@ -269,10 +220,34 @@ document.addEventListener("DOMContentLoaded", function () {
       const response = result.result;
 
       if (response && response.success) {
-        showStatus(
-          `图片已成功复制到剪贴板！(找到 ${response.count} 张图片)`,
-          "success"
-        );
+        // 第二步：在popup中复制图片到剪贴板
+        try {
+          showStatus("正在复制图片到剪贴板...", "success");
+
+          // 将base64数据转换回blob
+          const base64Data = response.imageData.split(",")[1];
+          const binaryData = atob(base64Data);
+          const bytes = new Uint8Array(binaryData.length);
+          for (let i = 0; i < binaryData.length; i++) {
+            bytes[i] = binaryData.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: response.mimeType });
+
+          // 在popup中复制到剪贴板（这里有用户交互上下文）
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [response.mimeType]: blob,
+            }),
+          ]);
+
+          showStatus(
+            `图片已成功复制到剪贴板！(找到 ${response.count} 张图片)`,
+            "success"
+          );
+        } catch (clipboardError) {
+          console.error("剪贴板复制失败:", clipboardError);
+          showStatus("复制到剪贴板失败: " + clipboardError.message, "error");
+        }
       } else {
         const errorMsg = response?.error || "复制失败，未知原因";
         console.error("复制失败:", errorMsg);

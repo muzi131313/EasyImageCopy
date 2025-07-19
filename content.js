@@ -31,6 +31,34 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 let currentSelector = '';
 let mutationObserver = null;
 let buttonCount = 0;
+let isUpdatingButtons = false;
+
+// SVG 图标
+const ICONS = {
+  COPY: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+  SUCCESS: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  LOADING: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="kiro-loader"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`,
+  ERROR: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+};
+
+// 注入CSS动画
+function injectStyles() {
+  const styleId = 'kiro-copy-styles';
+  if (document.getElementById(styleId)) return;
+
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.innerHTML = `
+    @keyframes kiro-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .kiro-loader {
+      animation: kiro-spin 1.2s linear infinite;
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 // 显示快速复制按钮
 function showQuickCopyButtons(selector) {
@@ -101,6 +129,9 @@ function createQuickCopyButton(element, index) {
       document.querySelector('.kiro-quick-copy-btn').remove();
     }
 
+    // 注入动画样式
+    injectStyles();
+
     // 获取目标元素的位置信息
     const rect = element.getBoundingClientRect();
     console.log("目标元素位置:", rect);
@@ -108,7 +139,7 @@ function createQuickCopyButton(element, index) {
     // 创建快速复制按钮
     const quickBtn = document.createElement('button');
     quickBtn.className = 'kiro-quick-copy-btn';
-    quickBtn.innerHTML = '📋';
+    quickBtn.innerHTML = ICONS.COPY;
     quickBtn.title = '快速复制图片';
     quickBtn.setAttribute('data-element-index', index);
     quickBtn.setAttribute('data-selector', currentSelector);
@@ -128,17 +159,16 @@ function createQuickCopyButton(element, index) {
       height: `${buttonSize}px`,
       borderRadius: '50%',
       border: 'none',
-      backgroundColor: '#4CAF50',
+      backgroundColor: 'rgba(30, 30, 30, 0.7)',
       color: 'white',
-      fontSize: '16px',
       cursor: 'pointer',
       zIndex: '10000',
       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      transition: 'all 0.2s ease',
-      fontFamily: 'Arial, sans-serif'
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(5px',
     });
 
     // 确保按钮不会超出视窗边界
@@ -157,13 +187,13 @@ function createQuickCopyButton(element, index) {
 
     // 鼠标悬停效果
     quickBtn.addEventListener('mouseenter', () => {
-      quickBtn.style.backgroundColor = '#45a049';
+      quickBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
       quickBtn.style.transform = 'scale(1.1)';
       quickBtn.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)';
     });
 
     quickBtn.addEventListener('mouseleave', () => {
-      quickBtn.style.backgroundColor = '#4CAF50';
+      quickBtn.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
       quickBtn.style.transform = 'scale(1)';
       quickBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
     });
@@ -177,8 +207,8 @@ function createQuickCopyButton(element, index) {
       const selector = button.dataset.selector;
 
       // 显示加载状态
-      button.innerHTML = '⏳';
-      button.style.backgroundColor = '#FF9800';
+      button.innerHTML = ICONS.LOADING;
+      button.style.backgroundColor = '#FF9800'; // 橙色
 
       try {
         // 检查选择器是否有效
@@ -223,27 +253,28 @@ function createQuickCopyButton(element, index) {
         const result = await copyImageFromElement(targetElement);
         if (result.success) {
           // 成功状态
-          button.innerHTML = '✅';
-          button.style.backgroundColor = '#4CAF50';
+          button.innerHTML = ICONS.SUCCESS;
+          button.style.backgroundColor = '#28a745'; // 绿色
           setTimeout(() => {
-            button.innerHTML = '📋';
+            button.innerHTML = ICONS.COPY;
+            button.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
           }, 2000);
         } else {
           // 失败状态
-          button.innerHTML = '❌';
-          button.style.backgroundColor = '#f44336';
+          button.innerHTML = ICONS.ERROR;
+          button.style.backgroundColor = '#dc3545'; // 红色
           setTimeout(() => {
-            button.innerHTML = '📋';
-            button.style.backgroundColor = '#4CAF50';
+            button.innerHTML = ICONS.COPY;
+            button.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
           }, 2000);
         }
       } catch (error) {
         console.error("快速复制失败:", error);
-        button.innerHTML = '❌';
-        button.style.backgroundColor = '#f44336';
+        button.innerHTML = ICONS.ERROR;
+        button.style.backgroundColor = '#dc3545'; // 红色
         setTimeout(() => {
-          button.innerHTML = '📋';
-          button.style.backgroundColor = '#4CAF50';
+          button.innerHTML = ICONS.COPY;
+          button.style.backgroundColor = 'rgba(30, 30, 30, 0.7)';
         }, 2000);
       }
     });
@@ -304,6 +335,9 @@ function startPageMonitoring() {
 
   // 创建MutationObserver监控DOM变化
   mutationObserver = new MutationObserver((mutations) => {
+    if (isUpdatingButtons) {
+      return;
+    }
     let needsUpdate = false;
 
     mutations.forEach((mutation) => {
@@ -346,9 +380,14 @@ function startPageMonitoring() {
     if (needsUpdate) {
       console.log("检测到页面元素变动，准备更新快速复制按钮");
       clearTimeout(window.kiroUpdateTimeout);
+      isUpdatingButtons = true;
       window.kiroUpdateTimeout = setTimeout(() => {
-        console.log("重新创建快速复制按钮");
-        showQuickCopyButtons(currentSelector);
+        try {
+          console.log("重新创建快速复制按钮");
+          showQuickCopyButtons(currentSelector);
+        } finally {
+          isUpdatingButtons = false;
+        }
       }, 500);
     }
   });

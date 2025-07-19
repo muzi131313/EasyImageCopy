@@ -7,11 +7,38 @@ document.addEventListener("DOMContentLoaded", function () {
   const currentSettingDiv = document.getElementById("currentSetting");
   const currentSelectorSpan = document.getElementById("currentSelector");
   const savedTagsDiv = document.getElementById("savedTags");
+  const autoModeSwitch = document.getElementById("autoMode");
 
   let currentSelectedTag = null;
 
   // 加载保存的标签和默认标签
   loadSavedTags();
+
+  // 加载自动复制模式设置
+  loadAutoModeSettings();
+
+  // 自动复制模式开关事件
+  autoModeSwitch.addEventListener("change", async function () {
+    try {
+      const isEnabled = autoModeSwitch.checked;
+      await saveAutoModeSettings(isEnabled);
+
+      if (isEnabled) {
+        showStatus("自动复制模式已开启", "success");
+        // 如果开启自动模式且有默认标签，立即执行复制
+        if (currentSelectedTag) {
+          setTimeout(() => {
+            copyImageBtn.click();
+          }, 500);
+        }
+      } else {
+        showStatus("自动复制模式已关闭", "success");
+      }
+    } catch (error) {
+      console.error("保存自动模式设置失败:", error);
+      showStatus("保存设置失败: " + error.message, "error");
+    }
+  });
 
   // 保存标签
   saveTagBtn.addEventListener("click", async function () {
@@ -379,10 +406,14 @@ document.addEventListener("DOMContentLoaded", function () {
         tagElement.classList.add("default");
       }
       tagElement.innerHTML = `
-        <span class="tag-name">${tag.name}</span>
-        <span class="tag-selector">${tag.selector}</span>
-        <button class="default-btn" title="设为默认标签">★</button>
-        <button class="delete-btn" title="删除标签">×</button>
+        <div class="tag-content">
+          <div class="tag-name">${tag.name}</div>
+          <div class="tag-selector">${tag.selector}</div>
+        </div>
+        <div class="tag-buttons">
+          <button class="default-btn" title="设为默认标签">★</button>
+          <button class="delete-btn" title="删除标签">×</button>
+        </div>
       `;
 
       // 点击标签选择
@@ -462,6 +493,54 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateCurrentSetting(selector) {
     currentSelectorSpan.textContent = selector;
     currentSettingDiv.style.display = "block";
+  }
+
+  // 加载自动复制模式设置
+  async function loadAutoModeSettings() {
+    try {
+      let autoModeEnabled = false;
+
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.sync
+      ) {
+        const result = await chrome.storage.sync.get(["autoModeEnabled"]);
+        autoModeEnabled = result.autoModeEnabled || false;
+      } else {
+        const stored = localStorage.getItem("autoModeEnabled");
+        autoModeEnabled = stored === "true";
+      }
+
+      autoModeSwitch.checked = autoModeEnabled;
+
+      // 如果自动模式开启且有默认标签，延迟执行复制
+      if (autoModeEnabled && currentSelectedTag) {
+        setTimeout(() => {
+          copyImageBtn.click();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("加载自动模式设置失败:", error);
+    }
+  }
+
+  // 保存自动复制模式设置
+  async function saveAutoModeSettings(enabled) {
+    try {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.sync
+      ) {
+        await chrome.storage.sync.set({ autoModeEnabled: enabled });
+      } else {
+        localStorage.setItem("autoModeEnabled", enabled.toString());
+      }
+    } catch (error) {
+      console.error("保存自动模式设置失败:", error);
+      localStorage.setItem("autoModeEnabled", enabled.toString());
+    }
   }
 
   function showStatus(message, type) {

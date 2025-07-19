@@ -1,220 +1,313 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body {
-      width: 320px;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
-    .input-group {
-      margin: 10px 0;
-    }
-    .input-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .input-group input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .save-button {
-      background-color: #4CAF50;
-      color: white;
-    }
-    .save-button:hover {
-      background-color: #45a049;
-    }
-    .copy-button {
-      background-color: #2196F3;
-      color: white;
-    }
-    .copy-button:hover {
-      background-color: #1976D2;
-    }
-    .copy-button:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-    .status {
-      margin-top: 10px;
-      padding: 8px;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-    .success {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .error {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    .current-setting {
-      background-color: #f8f9fa;
-      padding: 10px;
-      border-radius: 4px;
-      margin: 10px 0;
-      font-size: 12px;
-    }
-    .examples {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 5px;
-    }
-    .example-btn {
-      padding: 6px 10px;
-      border: 1px solid #ddd;
-      border-radius: 3px;
-      background-color: #f8f9fa;
-      cursor: pointer;
-      font-size: 11px;
-      color: #495057;
-    }
-    .example-btn:hover {
-      background-color: #e9ecef;
-      border-color: #adb5bd;
-    }
-    .saved-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 5px;
-      min-height: 30px;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
-      padding: 8px;
-      background-color: #f8f9fa;
-    }
-    .tag-item {
-      display: flex;
-      align-items: center;
-      padding: 6px 10px;
-      border: 1px solid #ddd;
-      border-radius: 15px;
-      background-color: white;
-      cursor: pointer;
-      font-size: 12px;
-      color: #495057;
-      transition: all 0.2s;
-    }
-    .tag-item:hover {
-      background-color: #e3f2fd;
-      border-color: #2196F3;
-    }
-    .tag-item.active {
-      background-color: #2196F3;
-      color: white;
-      border-color: #1976D2;
-    }
-    .tag-item .tag-name {
-      font-weight: bold;
-      margin-right: 5px;
-    }
-    .tag-item .tag-selector {
-      font-size: 10px;
-      opacity: 0.8;
-      max-width: 150px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .tag-item .delete-btn {
-      margin-left: 8px;
-      background: none;
-      border: none;
-      color: inherit;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 0;
-      opacity: 0.7;
-    }
-    .tag-item .delete-btn:hover {
-      opacity: 1;
-    }
-    .tag-item .default-btn {
-      margin-left: 5px;
-      background: none;
-      border: none;
-      color: inherit;
-      cursor: pointer;
-      font-size: 12px;
-      padding: 2px 4px;
-      opacity: 0.7;
-      border-radius: 3px;
-    }
-    .tag-item .default-btn:hover {
-      opacity: 1;
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    .tag-item.default {
-      border: 2px solid #FF9800;
-      box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
-    }
-    .tag-item.default::before {
-      content: "★";
-      color: #FF9800;
-      font-weight: bold;
-      margin-right: 5px;
-    }
-    .tag-item.default .default-btn {
-      display: none;
-    }
-    .empty-tags {
-      color: #6c757d;
-      font-style: italic;
-      font-size: 12px;
-      text-align: center;
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-  <h3>图片复制器</h3>
-  
-  <div class="input-group">
-    <label for="tagName">标签名称:</label>
-    <input type="text" id="tagName" placeholder="例如: Canvas面板">
-  </div>
-  
-  <div class="input-group">
-    <label for="classSelector">DOM节点选择器:</label>
-    <input type="text" id="classSelector" placeholder='例如: div[data-testid="canvas_panel_container"][data-visible="true"] img'>
-  </div>
-  
-  <button id="saveTag" class="button save-button">保存标签</button>
-  
-  <div class="input-group">
-    <label>已保存的标签:</label>
-    <div id="savedTags" class="saved-tags">
-      <!-- 保存的标签会显示在这里 -->
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 320px;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .input-group {
+        margin: 10px 0;
+      }
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      .input-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      .button {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .save-button {
+        background-color: #4caf50;
+        color: white;
+      }
+      .save-button:hover {
+        background-color: #45a049;
+      }
+      .copy-button {
+        background-color: #2196f3;
+        color: white;
+      }
+      .copy-button:hover {
+        background-color: #1976d2;
+      }
+      .copy-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .current-setting {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        font-size: 12px;
+      }
+      .examples {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 5px;
+      }
+      .example-btn {
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        font-size: 11px;
+        color: #495057;
+      }
+      .example-btn:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+      }
+      .saved-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 5px;
+        min-height: 30px;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 8px;
+        background-color: #f8f9fa;
+      }
+      .tag-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        background-color: white;
+        cursor: pointer;
+        font-size: 12px;
+        color: #495057;
+        transition: all 0.2s;
+        margin-bottom: 5px;
+        min-width: 0;
+        flex-shrink: 0;
+      }
+      .tag-item:hover {
+        background-color: #e3f2fd;
+        border-color: #2196f3;
+      }
+      .tag-item.active {
+        background-color: #2196f3;
+        color: white;
+        border-color: #1976d2;
+      }
+      .tag-item .tag-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        margin-right: 8px;
+      }
+      .tag-item .tag-name {
+        font-weight: bold;
+        font-size: 13px;
+        line-height: 1.2;
+      }
+      .tag-item .tag-selector {
+        font-size: 10px;
+        opacity: 0.7;
+        line-height: 1.2;
+        margin-top: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 180px;
+      }
+      .tag-item .tag-buttons {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .tag-item .default-btn {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 4px;
+        opacity: 0.7;
+        border-radius: 3px;
+        line-height: 1;
+      }
+      .tag-item .default-btn:hover {
+        opacity: 1;
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      .tag-item .delete-btn {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        opacity: 0.7;
+        line-height: 1;
+      }
+      .tag-item .delete-btn:hover {
+        opacity: 1;
+      }
+      .tag-item.default {
+        border: 2px solid #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
+        position: relative;
+      }
+      .tag-item.default::before {
+        content: "★";
+        color: #ff9800;
+        font-weight: bold;
+        font-size: 14px;
+        margin-right: 6px;
+        flex-shrink: 0;
+      }
+      .tag-item.default .default-btn {
+        display: none;
+      }
+      .empty-tags {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 12px;
+        text-align: center;
+        width: 100%;
+      }
+      .switch-container {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: normal !important;
+        margin-bottom: 0;
+        padding: 8px 0;
+        gap: 15px;
+      }
+      .switch-input {
+        display: none;
+      }
+      .switch-slider {
+        position: relative;
+        width: 50px;
+        height: 24px;
+        background-color: #ccc;
+        border-radius: 24px;
+        transition: background-color 0.3s;
+        flex-shrink: 0;
+        order: 1;
+      }
+      .switch-slider::before {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        transition: transform 0.3s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .switch-input:checked + .switch-slider {
+        background-color: #4caf50;
+      }
+      .switch-input:checked + .switch-slider::before {
+        transform: translateX(26px);
+      }
+      .switch-label {
+        font-size: 14px;
+        color: #495057;
+        flex: 1;
+        user-select: none;
+        line-height: 1;
+        order: 2;
+        line-height: 1.65;
+        padding-left: 60px;
+      }
+      .switch-description {
+        font-size: 11px;
+        color: #6c757d;
+        margin-top: 8px;
+        line-height: 1.4;
+        padding-left: 0;
+        clear: both;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>图片复制器</h3>
+
+    <div class="input-group">
+      <label for="tagName">标签名称:</label>
+      <input type="text" id="tagName" placeholder="例如: Canvas面板" />
     </div>
-  </div>
-  
-  <div id="currentSetting" class="current-setting" style="display: none;">
-    <strong>当前选择:</strong> <span id="currentSelector"></span>
-  </div>
-  
-  <button id="copyImage" class="button copy-button" disabled>复制图片</button>
-  
-  <div id="status"></div>
-  <script src="popup.js"></script>
-</body>
+
+    <div class="input-group">
+      <label for="classSelector">DOM节点选择器:</label>
+      <input
+        type="text"
+        id="classSelector"
+        placeholder='例如: div[data-testid="canvas_panel_container"][data-visible="true"] img'
+      />
+    </div>
+
+    <button id="saveTag" class="button save-button">保存标签</button>
+
+    <div class="input-group">
+      <label>已保存的标签:</label>
+      <div id="savedTags" class="saved-tags">
+        <!-- 保存的标签会显示在这里 -->
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="switch-container">
+        <input type="checkbox" id="autoMode" class="switch-input" />
+        <span class="switch-slider"></span>
+        <span class="switch-label">自动复制模式</span>
+      </label>
+      <div class="switch-description">
+        开启后，打开插件时自动使用默认标签复制图片
+      </div>
+    </div>
+
+    <div id="currentSetting" class="current-setting" style="display: none">
+      <strong>当前选择:</strong> <span id="currentSelector"></span>
+    </div>
+
+    <button id="copyImage" class="button copy-button" disabled>复制图片</button>
+
+    <div id="status"></div>
+    <script src="popup.js"></script>
+  </body>
 </html>

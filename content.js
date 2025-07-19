@@ -385,7 +385,11 @@ function startPageMonitoring() {
           console.log("重新创建快速复制按钮");
           showQuickCopyButtons(currentSelector);
         } finally {
-          isUpdatingButtons = false;
+          // 延迟一小段时间再重置标志位，
+          // 以避免页面对按钮插入的响应触发新的更新循环。
+          setTimeout(() => {
+            isUpdatingButtons = false;
+          }, 100);
         }
       }, 500);
     }

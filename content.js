@@ -341,7 +341,6 @@ function startPageMonitoring() {
     let needsUpdate = false;
 
     mutations.forEach((mutation) => {
-      console.log('[debug] mutation.type: ', mutation.type)
       // 检查是否有节点被添加或移除
       if (mutation.type === 'childList') {
         // 检查是否有快速复制按钮被移除

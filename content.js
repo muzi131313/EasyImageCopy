@@ -63,7 +63,7 @@ function injectStyles() {
 // 显示快速复制按钮
 function showQuickCopyButtons(selector) {
   console.log("开始显示快速复制按钮，选择器:", selector);
-  const currentSelectorForUpdate = selector;
+  let currentSelectorForUpdate = selector;
 
   // 保存当前选择器
   currentSelector = selector;

@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const currentSelectorSpan = document.getElementById("currentSelector");
   const savedTagsDiv = document.getElementById("savedTags");
   const autoModeSwitch = document.getElementById("autoMode");
+  const quickCopyModeSwitch = document.getElementById("quickCopyMode");
 
   let currentSelectedTag = null;
 
@@ -16,6 +17,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 加载自动复制模式设置
   loadAutoModeSettings();
+  
+  // 加载快速复制模式设置
+  loadQuickCopyModeSettings();
+  
+  // 测试快速复制开关是否存在
+  console.log("快速复制开关元素:", quickCopyModeSwitch);
+  if (!quickCopyModeSwitch) {
+    console.error("找不到快速复制开关元素！");
+  }
 
   // 自动复制模式开关事件
   autoModeSwitch.addEventListener("change", async function () {
@@ -36,6 +46,37 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     } catch (error) {
       console.error("保存自动模式设置失败:", error);
+      showStatus("保存设置失败: " + error.message, "error");
+    }
+  });
+
+  // 快速复制模式开关事件
+  quickCopyModeSwitch.addEventListener("change", async function () {
+    console.log("快速复制开关被点击");
+    try {
+      const isEnabled = quickCopyModeSwitch.checked;
+      console.log("快速复制模式开关状态:", isEnabled);
+      console.log("当前选中标签:", currentSelectedTag);
+      
+      await saveQuickCopyModeSettings(isEnabled);
+
+      if (isEnabled) {
+        showStatus("快速复制按钮已开启", "success");
+        // 如果有选中的标签，显示快速复制按钮
+        if (currentSelectedTag) {
+          console.log("开始显示快速复制按钮，选择器:", currentSelectedTag.selector);
+          await showQuickCopyButtons(currentSelectedTag.selector);
+        } else {
+          console.log("没有选中的标签，无法显示快速复制按钮");
+          showStatus("请先选择一个标签", "error");
+        }
+      } else {
+        showStatus("快速复制按钮已关闭", "success");
+        // 隐藏快速复制按钮
+        await hideQuickCopyButtons();
+      }
+    } catch (error) {
+      console.error("保存快速复制模式设置失败:", error);
       showStatus("保存设置失败: " + error.message, "error");
     }
   });
@@ -435,6 +476,11 @@ document.addEventListener("DOMContentLoaded", function () {
         updateCurrentSetting(tag.selector);
         copyImageBtn.disabled = false;
 
+        // 如果快速复制模式开启，显示快速复制按钮
+        if (quickCopyModeSwitch.checked) {
+          showQuickCopyButtons(tag.selector);
+        }
+
         showStatus(`已选择标签: ${tag.name}`, "success");
       });
 
@@ -540,6 +586,118 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
       console.error("保存自动模式设置失败:", error);
       localStorage.setItem("autoModeEnabled", enabled.toString());
+    }
+  }
+
+  // 加载快速复制模式设置
+  async function loadQuickCopyModeSettings() {
+    try {
+      let quickCopyEnabled = false;
+
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.sync
+      ) {
+        const result = await chrome.storage.sync.get(["quickCopyEnabled"]);
+        quickCopyEnabled = result.quickCopyEnabled || false;
+      } else {
+        const stored = localStorage.getItem("quickCopyEnabled");
+        quickCopyEnabled = stored === "true";
+      }
+
+      quickCopyModeSwitch.checked = quickCopyEnabled;
+
+      // 如果快速复制模式开启且有选中标签，显示快速复制按钮
+      if (quickCopyEnabled && currentSelectedTag) {
+        setTimeout(async () => {
+          await showQuickCopyButtons(currentSelectedTag.selector);
+        }, 500);
+      }
+    } catch (error) {
+      console.error("加载快速复制模式设置失败:", error);
+    }
+  }
+
+  // 保存快速复制模式设置
+  async function saveQuickCopyModeSettings(enabled) {
+    try {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.sync
+      ) {
+        await chrome.storage.sync.set({ quickCopyEnabled: enabled });
+      } else {
+        localStorage.setItem("quickCopyEnabled", enabled.toString());
+      }
+    } catch (error) {
+      console.error("保存快速复制模式设置失败:", error);
+      localStorage.setItem("quickCopyEnabled", enabled.toString());
+    }
+  }
+
+  // 显示快速复制按钮
+  async function showQuickCopyButtons(selector) {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    try {
+      // 首先尝试注入content script
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['content.js']
+        });
+        console.log("Content script 注入成功");
+      } catch (injectError) {
+        console.log("Content script 可能已经存在:", injectError.message);
+      }
+
+      // 等待一小段时间确保脚本加载完成
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: "showQuickCopyButtons",
+        selector: selector,
+      });
+      
+      if (response && !response.success) {
+        showStatus(response.error || "快速复制按钮显示失败", "error");
+      } else if (response && response.success) {
+        if (response.buttonCount > 0) {
+          showStatus(`已显示 ${response.buttonCount} 个快速复制按钮`, "success");
+        } else {
+          showStatus("未找到匹配的图片元素，请检查选择器", "error");
+        }
+      }
+    } catch (error) {
+      console.error("显示快速复制按钮失败:", error);
+      if (error.message.includes("Could not establish connection")) {
+        showStatus("无法连接到页面脚本，请刷新页面后重试", "error");
+      } else if (error.message.includes("Cannot access")) {
+        showStatus("无法访问此页面，请在普通网页上使用此插件", "error");
+      } else {
+        showStatus("显示快速复制按钮失败: " + error.message, "error");
+      }
+    }
+  }
+
+  // 隐藏快速复制按钮
+  async function hideQuickCopyButtons() {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    try {
+      await chrome.tabs.sendMessage(tab.id, {
+        action: "hideQuickCopyButtons",
+      });
+    } catch (error) {
+      console.error("隐藏快速复制按钮失败:", error);
     }
   }
 

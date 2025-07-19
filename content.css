@@ -1,0 +1,23 @@
+/* 找到图片时的高亮样式 */
+.kiro-found-image {
+  outline: 3px solid #FF9800 !important;
+  outline-offset: 2px !important;
+  background-color: rgba(255, 152, 0, 0.2) !important;
+  animation: kiro-pulse 1s ease-in-out 3;
+}
+
+/* 脉冲动画 */
+@keyframes kiro-pulse {
+  0% {
+    outline-color: #FF9800;
+    background-color: rgba(255, 152, 0, 0.2);
+  }
+  50% {
+    outline-color: #FFC107;
+    background-color: rgba(255, 193, 7, 0.3);
+  }
+  100% {
+    outline-color: #FF9800;
+    background-color: rgba(255, 152, 0, 0.2);
+  }
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 320px;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .input-group {
+      margin: 10px 0;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .save-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .save-button:hover {
+      background-color: #45a049;
+    }
+    .copy-button {
+      background-color: #2196F3;
+      color: white;
+    }
+    .copy-button:hover {
+      background-color: #1976D2;
+    }
+    .copy-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .current-setting {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .example-btn {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      background-color: #f8f9fa;
+      cursor: pointer;
+      font-size: 11px;
+      color: #495057;
+    }
+    .example-btn:hover {
+      background-color: #e9ecef;
+      border-color: #adb5bd;
+    }
+  </style>
+</head>
+<body>
+  <h3>图片复制器</h3>
+  
+  <div class="input-group">
+    <label for="classSelector">DOM节点选择器:</label>
+    <input type="text" id="classSelector" placeholder='例如: [data-testid="canvas_panel_container"][data-visible="true"]'>
+  </div>
+  
+  <div class="input-group">
+    <label>常用选择器示例:</label>
+    <div class="examples">
+      <button class="example-btn" data-selector='[data-testid="canvas_panel_container"][data-visible="true"]'>Canvas面板</button>
+      <button class="example-btn" data-selector='.image-gallery img'>图片画廊</button>
+      <button class="example-btn" data-selector='img.thumbnail'>缩略图</button>
+      <button class="example-btn" data-selector='[role="img"]'>角色图片</button>
+    </div>
+  </div>
+  
+  <button id="saveSettings" class="button save-button">保存设置</button>
+  
+  <div id="currentSetting" class="current-setting" style="display: none;">
+    <strong>当前设置:</strong> <span id="currentSelector"></span>
+  </div>
+  
+  <button id="copyImage" class="button copy-button" disabled>复制图片</button>
+  
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

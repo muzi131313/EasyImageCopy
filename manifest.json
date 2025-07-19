@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "图片选择复制器",
+  "version": "1.0",
+  "description": "选择DOM节点并复制相关图片到剪贴板",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "图片选择复制器"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

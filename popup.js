@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let currentSelectedTag = null;
 
-  // 加载保存的标签
+  // 加载保存的标签和默认标签
   loadSavedTags();
 
   // 保存标签
@@ -370,6 +370,22 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadSavedTags() {
     const tags = await getSavedTags();
     displayTags(tags);
+
+    // 自动选择默认标签
+    const defaultTag = tags.find((tag) => tag.isDefault);
+    if (defaultTag && !currentSelectedTag) {
+      currentSelectedTag = defaultTag;
+      updateCurrentSetting(defaultTag.selector);
+      copyImageBtn.disabled = false;
+
+      // 高亮默认标签
+      setTimeout(() => {
+        const defaultTagElement = document.querySelector(".tag-item.default");
+        if (defaultTagElement) {
+          defaultTagElement.classList.add("active");
+        }
+      }, 100);
+    }
   }
 
   // 显示标签
@@ -384,9 +400,13 @@ document.addEventListener("DOMContentLoaded", function () {
     tags.forEach((tag, index) => {
       const tagElement = document.createElement("div");
       tagElement.className = "tag-item";
+      if (tag.isDefault) {
+        tagElement.classList.add("default");
+      }
       tagElement.innerHTML = `
         <span class="tag-name">${tag.name}</span>
         <span class="tag-selector">${tag.selector}</span>
+        <button class="default-btn" title="设为默认标签">★</button>
         <button class="delete-btn" title="删除标签">×</button>
       `;
 
@@ -410,6 +430,27 @@ document.addEventListener("DOMContentLoaded", function () {
         copyImageBtn.disabled = false;
 
         showStatus(`已选择标签: ${tag.name}`, "success");
+      });
+
+      // 设为默认标签
+      const defaultBtn = tagElement.querySelector(".default-btn");
+      defaultBtn.addEventListener("click", async function (e) {
+        e.stopPropagation();
+
+        try {
+          // 清除所有标签的默认状态
+          const updatedTags = tags.map((t) => ({ ...t, isDefault: false }));
+          // 设置当前标签为默认
+          updatedTags[index].isDefault = true;
+
+          await saveTags(updatedTags);
+          loadSavedTags();
+
+          showStatus(`已将 "${tag.name}" 设为默认标签`, "success");
+        } catch (error) {
+          console.error("设置默认标签失败:", error);
+          showStatus("设置默认标签失败: " + error.message, "error");
+        }
       });
 
       // 删除标签

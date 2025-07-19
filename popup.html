@@ -149,6 +149,34 @@
     .tag-item .delete-btn:hover {
       opacity: 1;
     }
+    .tag-item .default-btn {
+      margin-left: 5px;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+      opacity: 0.7;
+      border-radius: 3px;
+    }
+    .tag-item .default-btn:hover {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .tag-item.default {
+      border: 2px solid #FF9800;
+      box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
+    }
+    .tag-item.default::before {
+      content: "★";
+      color: #FF9800;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    .tag-item.default .default-btn {
+      display: none;
+    }
     .empty-tags {
       color: #6c757d;
       font-style: italic;

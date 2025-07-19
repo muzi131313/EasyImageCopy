@@ -227,6 +227,7 @@
         transition: background-color 0.3s;
         flex-shrink: 0;
         order: 1;
+        display: inline-block;
       }
       .switch-slider::before {
         content: "";
@@ -235,6 +236,8 @@
         height: 20px;
         border-radius: 50%;
         background-color: white;
+        top: 2px;
+        left: 2px;
         transition: transform 0.3s;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       }
@@ -251,8 +254,9 @@
         user-select: none;
         line-height: 1;
         order: 2;
-        line-height: 1.65;
-        padding-left: 60px;
+        position: relative;
+        top: -7px;
+        left: 4px;
       }
       .switch-description {
         font-size: 11px;

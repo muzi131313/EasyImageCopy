@@ -18,6 +18,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
   if (request.action === 'showQuickCopyButtons') {
     const result = showQuickCopyButtons(request.selector);
+    // 如果监控尚未启动，则启动它
+    if (!mutationObserver) {
+      startPageMonitoring();
+    }
     sendResponse(result);
   }
 
@@ -63,16 +67,12 @@ function injectStyles() {
 // 显示快速复制按钮
 function showQuickCopyButtons(selector) {
   console.log("开始显示快速复制按钮，选择器:", selector);
-  let currentSelectorForUpdate = selector;
 
   // 保存当前选择器
   currentSelector = selector;
 
   // 先移除已存在的按钮
-  hideQuickCopyButtons();
-
-  // 恢复选择器，因为 hideQuickCopyButtons 会清空它
-  currentSelector = currentSelectorForUpdate;
+  removeAllQuickCopyButtons();
 
   // 重置按钮计数
   buttonCount = 0;
@@ -108,8 +108,7 @@ function showQuickCopyButtons(selector) {
       }
     }
 
-    // 启动页面监控
-    startPageMonitoring();
+    // 不再从此函数启动页面监控
 
     console.log(`成功创建 ${buttonCount} 个快速复制按钮`);
     return { success: true, buttonCount: buttonCount };
@@ -144,17 +143,12 @@ function createQuickCopyButton(element, index) {
     quickBtn.setAttribute('data-element-index', index);
     quickBtn.setAttribute('data-selector', currentSelector);
 
-    // 计算按钮位置（在目标元素右上角外侧）
     const buttonSize = 40;
     const offset = 10;
-    const left = rect.right + offset;
-    const top = rect.top - offset;
 
-    // 设置按钮样式 - 使用fixed定位
+    // 设置按钮样式 - 初始隐藏
     Object.assign(quickBtn.style, {
       position: 'fixed',
-      left: `${left}px`,
-      top: `${top}px`,
       width: `${buttonSize}px`,
       height: `${buttonSize}px`,
       borderRadius: '50%',
@@ -164,26 +158,12 @@ function createQuickCopyButton(element, index) {
       cursor: 'pointer',
       zIndex: '10000',
       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-      display: 'flex',
+      display: 'none', // 关键：初始时隐藏
       alignItems: 'center',
       justifyContent: 'center',
       transition: 'all 0.3s ease',
-      backdropFilter: 'blur(5px',
+      backdropFilter: 'blur(5px)',
     });
-
-    // 确保按钮不会超出视窗边界
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    if (left + buttonSize > viewportWidth) {
-      // 如果右侧超出，放到元素左侧
-      quickBtn.style.left = `${rect.left - buttonSize - offset}px`;
-    }
-
-    if (top < 0) {
-      // 如果上方超出，放到元素下方
-      quickBtn.style.top = `${rect.bottom + offset}px`;
-    }
 
     // 鼠标悬停效果
     quickBtn.addEventListener('mouseenter', () => {
@@ -279,43 +259,62 @@ function createQuickCopyButton(element, index) {
       }
     });
 
-    // 监听页面滚动，更新按钮位置
+    // 统一的定位和显隐函数
     const updateButtonPosition = () => {
-      const newRect = element.getBoundingClientRect();
-      const newLeft = newRect.right + offset;
-      const newTop = newRect.top - offset;
+      const rect = element.getBoundingClientRect();
 
-      quickBtn.style.left = `${newLeft}px`;
-      quickBtn.style.top = `${newTop}px`;
-
-      // 检查边界
-      if (newLeft + buttonSize > window.innerWidth) {
-        quickBtn.style.left = `${newRect.left - buttonSize - offset}px`;
-      }
-
-      if (newTop < 0) {
-        quickBtn.style.top = `${newRect.bottom + offset}px`;
-      }
-
-      // 如果元素不在视窗内，隐藏按钮
-      if (newRect.bottom < 0 || newRect.top > window.innerHeight ||
-          newRect.right < 0 || newRect.left > window.innerWidth) {
+      // 如果元素无尺寸或不在视窗内，则隐藏按钮
+      if (rect.width === 0 || rect.height === 0 ||
+          rect.bottom < 0 || rect.top > window.innerHeight ||
+          rect.right < 0 || rect.left > window.innerWidth) {
         quickBtn.style.display = 'none';
+        return;
+      }
+
+      // 计算位置
+      let left = rect.right + offset;
+      let top = rect.top - offset;
+
+      const viewportWidth = window.innerWidth;
+      if (left + buttonSize > viewportWidth) {
+        left = rect.left - buttonSize - offset;
+      }
+      if (top < 0) {
+        top = rect.bottom + offset;
+      }
+
+      quickBtn.style.left = `${left}px`;
+      quickBtn.style.top = `${top}px`;
+      quickBtn.style.display = 'flex'; // 定位后显示
+    };
+
+    // 带重试逻辑的初始定位
+    const attemptInitialPosition = (retries = 5) => {
+      if (retries <= 0) {
+        // 重试次数用尽，尝试最后一次定位
+        updateButtonPosition();
+        return;
+      }
+      const rect = element.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        setTimeout(() => attemptInitialPosition(retries - 1), 200);
       } else {
-        quickBtn.style.display = 'flex';
+        updateButtonPosition();
       }
     };
 
-    // 添加滚动监听
+    // 添加滚动和缩放监听
     window.addEventListener('scroll', updateButtonPosition, { passive: true });
     window.addEventListener('resize', updateButtonPosition, { passive: true });
 
     // 保存更新函数的引用，以便后续移除
     quickBtn._updatePosition = updateButtonPosition;
 
-    // 添加按钮到页面
+    // 添加按钮到页面并开始定位
     document.body.appendChild(quickBtn);
-    console.log(`成功创建快速复制按钮，位置: (${left}, ${top})`);
+    attemptInitialPosition();
+
+    console.log(`成功创建快速复制按钮`);
     return true;
 
   } catch (error) {
@@ -419,7 +418,22 @@ function stopPageMonitoring() {
   }
 }
 
-// 隐藏快速复制按钮
+// 新增：只负责移除按钮和监听器
+function removeAllQuickCopyButtons() {
+  const existingButtons = document.querySelectorAll('.kiro-quick-copy-btn');
+  if (existingButtons.length === 0) return;
+
+  console.log(`移除 ${existingButtons.length} 个快速复制按钮`);
+  existingButtons.forEach(btn => {
+    if (btn._updatePosition) {
+      window.removeEventListener('scroll', btn._updatePosition);
+      window.removeEventListener('resize', btn._updatePosition);
+    }
+    btn.remove();
+  });
+}
+
+// 隐藏快速复制按钮 (功能关闭)
 function hideQuickCopyButtons() {
   console.log("隐藏快速复制按钮");
 
@@ -429,17 +443,8 @@ function hideQuickCopyButtons() {
   // 清空当前选择器
   currentSelector = '';
 
-  // 移除所有快速复制按钮和相关事件监听器
-  const existingButtons = document.querySelectorAll('.kiro-quick-copy-btn');
-  console.log(`移除 ${existingButtons.length} 个快速复制按钮`);
-  existingButtons.forEach(btn => {
-    // 移除滚动和resize事件监听器
-    if (btn._updatePosition) {
-      window.removeEventListener('scroll', btn._updatePosition);
-      window.removeEventListener('resize', btn._updatePosition);
-    }
-    btn.remove();
-  });
+  // 移除所有快速复制按钮
+  removeAllQuickCopyButtons();
 
   // 重置按钮计数
   buttonCount = 0;

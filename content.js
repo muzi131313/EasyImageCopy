@@ -32,13 +32,23 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 });
 
 // 全局变量
-let currentSelector = '';
-let mutationObserver = null;
-let buttonCount = 0;
-let isUpdatingButtons = false;
+var currentSelector = '';
+var mutationObserver = null;
+var buttonCount = 0;
+var isUpdatingButtons = false;
+
+// 安全地获取国际化消息的辅助函数
+function safeGetMessage(key, fallback) {
+  try {
+    return safeGetMessage(key) || fallback;
+  } catch (e) {
+    console.warn('Extension context invalidated, using fallback text:', fallback);
+    return fallback;
+  }
+}
 
 // SVG 图标
-const ICONS = {
+var ICONS = {
   COPY: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
   SUCCESS: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
   LOADING: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="kiro-loader"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`,
@@ -139,7 +149,7 @@ function createQuickCopyButton(element, index) {
     const quickBtn = document.createElement('button');
     quickBtn.className = 'kiro-quick-copy-btn';
     quickBtn.innerHTML = ICONS.COPY;
-    quickBtn.title = chrome.i18n.getMessage('quickCopyButtonTitle') || '快速复制图片';
+    quickBtn.title = safeGetMessage('quickCopyButtonTitle', '快速复制图片');
     quickBtn.setAttribute('data-element-index', index);
     quickBtn.setAttribute('data-selector', currentSelector);
 
@@ -193,7 +203,7 @@ function createQuickCopyButton(element, index) {
       try {
         // 检查选择器是否有效
         if (!selector || selector.trim() === '') {
-          throw new Error(chrome.i18n.getMessage('selectorEmpty') || "选择器为空，无法查找目标元素");
+          throw new Error(safeGetMessage('selectorEmpty') || "选择器为空，无法查找目标元素");
         }
 
         // 重新查找当前的目标元素，确保复制最新的图片
@@ -210,7 +220,7 @@ function createQuickCopyButton(element, index) {
         console.log("当前找到的元素数量:", currentElements.length);
 
         if (currentElements.length === 0) {
-          throw new Error(chrome.i18n.getMessage('noElementFound') || "未找到匹配的元素");
+          throw new Error(safeGetMessage('noElementFound') || "未找到匹配的元素");
         }
 
         let targetElement = null;
@@ -227,7 +237,7 @@ function createQuickCopyButton(element, index) {
         }
 
         if (!targetElement) {
-          throw new Error(chrome.i18n.getMessage('noImageFound') || "未找到包含图片的目标元素");
+          throw new Error(safeGetMessage('noImageFound') || "未找到包含图片的目标元素");
         }
 
         const result = await copyImageFromElement(targetElement);
@@ -470,7 +480,7 @@ async function copyImageFromElement(element) {
     }
 
     if (!imgSrc) {
-      return { success: false, error: chrome.i18n.getMessage('noImageFound') || '未找到图片' };
+      return { success: false, error: safeGetMessage('noImageFound') || '未找到图片' };
     }
 
     // 高亮显示图片
@@ -486,12 +496,12 @@ async function copyImageFromElement(element) {
     // 获取图片数据
     const response = await fetch(imgSrc);
     if (!response.ok) {
-      return { success: false, error: chrome.i18n.getMessage('downloadFailed') || '无法下载图片' };
+      return { success: false, error: safeGetMessage('downloadFailed') || '无法下载图片' };
     }
 
     const blob = await response.blob();
     if (!blob.type.startsWith('image/')) {
-      return { success: false, error: chrome.i18n.getMessage('invalidImageFormat') || '不是有效的图片格式' };
+      return { success: false, error: safeGetMessage('invalidImageFormat') || '不是有效的图片格式' };
     }
 
     // 复制到剪贴板
@@ -640,7 +650,7 @@ async function downloadAndCopyImage(imageUrl) {
 
     // 检查剪贴板API是否可用
     if (!navigator.clipboard) {
-      throw new Error(chrome.i18n.getMessage('clipboardNotSupported') || '浏览器不支持剪贴板API');
+      throw new Error(safeGetMessage('clipboardNotSupported') || '浏览器不支持剪贴板API');
     }
 
     // 获取图片数据

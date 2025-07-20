@@ -1,0 +1,202 @@
+{
+  "extensionName": {
+    "message": "图片选择复制器",
+    "description": "插件名称"
+  },
+  "extensionDescription": {
+    "message": "选择DOM节点并复制相关图片到剪贴板",
+    "description": "插件描述"
+  },
+  "popupTitle": {
+    "message": "图片复制器",
+    "description": "弹窗标题"
+  },
+  "tagNameLabel": {
+    "message": "标签名称:",
+    "description": "标签名称输入框标签"
+  },
+  "tagNamePlaceholder": {
+    "message": "例如: Canvas面板",
+    "description": "标签名称输入框占位符"
+  },
+  "selectorLabel": {
+    "message": "DOM节点选择器:",
+    "description": "选择器输入框标签"
+  },
+  "selectorPlaceholder": {
+    "message": "例如: div[data-testid=\"canvas_panel_container\"][data-visible=\"true\"] img",
+    "description": "选择器输入框占位符"
+  },
+  "saveTagButton": {
+    "message": "保存标签",
+    "description": "保存标签按钮文本"
+  },
+  "savedTagsLabel": {
+    "message": "已保存的标签:",
+    "description": "已保存标签区域标签"
+  },
+  "autoModeLabel": {
+    "message": "自动复制模式",
+    "description": "自动模式开关标签"
+  },
+  "autoModeDescription": {
+    "message": "开启后，打开插件时自动使用默认标签复制图片",
+    "description": "自动模式开关描述"
+  },
+  "quickCopyModeLabel": {
+    "message": "快速复制按钮",
+    "description": "快速复制模式开关标签"
+  },
+  "quickCopyModeDescription": {
+    "message": "在目标元素上显示快速复制按钮，点击即可复制图片",
+    "description": "快速复制模式开关描述"
+  },
+  "currentSelectionLabel": {
+    "message": "当前选择:",
+    "description": "当前选择显示标签"
+  },
+  "copyImageButton": {
+    "message": "复制图片",
+    "description": "复制图片按钮文本"
+  },
+  "quickCopyButtonTitle": {
+    "message": "快速复制图片",
+    "description": "快速复制按钮提示文本"
+  },
+  "copySuccess": {
+    "message": "图片复制成功!",
+    "description": "复制成功提示"
+  },
+  "copyFailed": {
+    "message": "复制失败:",
+    "description": "复制失败提示前缀"
+  },
+  "noImageFound": {
+    "message": "未找到图片",
+    "description": "未找到图片错误"
+  },
+  "noElementFound": {
+    "message": "未找到匹配的元素",
+    "description": "未找到元素错误"
+  },
+  "selectorEmpty": {
+    "message": "选择器为空，无法查找目标元素",
+    "description": "选择器为空错误"
+  },
+  "invalidImageFormat": {
+    "message": "不是有效的图片格式",
+    "description": "无效图片格式错误"
+  },
+  "downloadFailed": {
+    "message": "无法下载图片",
+    "description": "下载图片失败错误"
+  },
+  "clipboardNotSupported": {
+    "message": "浏览器不支持剪贴板API",
+    "description": "剪贴板API不支持错误"
+  },
+  "tagSaveSuccess": {
+    "message": "标签保存成功!",
+    "description": "标签保存成功提示"
+  },
+  "tagSaveFailed": {
+    "message": "请填写标签名称和选择器",
+    "description": "标签保存失败提示"
+  },
+  "processing": {
+    "message": "处理中...",
+    "description": "处理中提示"
+  },
+  "showQuickCopyButtons": {
+    "message": "显示快速复制按钮",
+    "description": "显示快速复制按钮操作"
+  },
+  "hideQuickCopyButtons": {
+    "message": "隐藏快速复制按钮",
+    "description": "隐藏快速复制按钮操作"
+  },
+  "autoModeEnabled": {
+    "message": "自动复制模式已开启",
+    "description": "自动模式启用提示"
+  },
+  "autoModeDisabled": {
+    "message": "自动复制模式已关闭",
+    "description": "自动模式禁用提示"
+  },
+  "quickCopyEnabled": {
+    "message": "快速复制按钮已开启",
+    "description": "快速复制模式启用提示"
+  },
+  "quickCopyDisabled": {
+    "message": "快速复制按钮已关闭",
+    "description": "快速复制模式禁用提示"
+  },
+  "pleaseSelectTag": {
+    "message": "请先选择一个标签",
+    "description": "需要选择标签的提示"
+  },
+  "saveSettingsFailed": {
+    "message": "保存设置失败:",
+    "description": "保存设置失败前缀"
+  },
+  "pleaseEnterTagName": {
+    "message": "请输入标签名称",
+    "description": "需要输入标签名称的提示"
+  },
+  "pleaseEnterSelector": {
+    "message": "请输入DOM节点选择器",
+    "description": "需要输入选择器的提示"
+  },
+  "tagUpdated": {
+    "message": "标签已更新",
+    "description": "标签更新成功提示"
+  },
+  "tagSaved": {
+    "message": "标签已保存",
+    "description": "标签保存成功提示"
+  },
+  "saveTagFailed": {
+    "message": "保存失败:",
+    "description": "保存标签失败前缀"
+  },
+  "pleaseSelectTagOrSetSelector": {
+    "message": "请先选择一个标签或设置CSS选择器",
+    "description": "需要选择标签或设置选择器的提示"
+  },
+  "findingAndCopyingImage": {
+    "message": "正在查找和复制图片...",
+    "description": "查找和复制图片进行中提示"
+  },
+  "copyingToClipboard": {
+    "message": "正在复制图片到剪贴板...",
+    "description": "复制到剪贴板进行中提示"
+  },
+  "showSuccessMessage": {
+    "message": "图片已成功复制到剪贴板！",
+    "description": "复制成功的详细消息"
+  },
+  "copyFailedMessage": {
+    "message": "复制图片失败:",
+    "description": "复制失败消息前缀"
+  },
+  "clipboardCopyFailed": {
+    "message": "复制到剪贴板失败:",
+    "description": "剪贴板复制失败前缀"
+  },
+  "setDefaultTagFailed": {
+    "message": "设置默认标签失败:",
+    "description": "设置默认标签失败前缀"
+  },
+  "deleteFailed": {
+    "message": "删除失败:",
+    "description": "删除失败前缀"
+  },
+  "quickCopyButtonShowFailed": {
+    "message": "快速复制按钮显示失败",
+    "description": "快速复制按钮显示失败消息"
+  },
+  "showQuickCopyButtonFailed": {
+    "message": "显示快速复制按钮失败:",
+    "description": "显示快速复制按钮失败前缀"
+  }
+}

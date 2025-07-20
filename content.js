@@ -139,7 +139,7 @@ function createQuickCopyButton(element, index) {
     const quickBtn = document.createElement('button');
     quickBtn.className = 'kiro-quick-copy-btn';
     quickBtn.innerHTML = ICONS.COPY;
-    quickBtn.title = '快速复制图片';
+    quickBtn.title = chrome.i18n.getMessage('quickCopyButtonTitle') || '快速复制图片';
     quickBtn.setAttribute('data-element-index', index);
     quickBtn.setAttribute('data-selector', currentSelector);
 
@@ -193,7 +193,7 @@ function createQuickCopyButton(element, index) {
       try {
         // 检查选择器是否有效
         if (!selector || selector.trim() === '') {
-          throw new Error("选择器为空，无法查找目标元素");
+          throw new Error(chrome.i18n.getMessage('selectorEmpty') || "选择器为空，无法查找目标元素");
         }
 
         // 重新查找当前的目标元素，确保复制最新的图片
@@ -210,7 +210,7 @@ function createQuickCopyButton(element, index) {
         console.log("当前找到的元素数量:", currentElements.length);
 
         if (currentElements.length === 0) {
-          throw new Error("未找到匹配的元素");
+          throw new Error(chrome.i18n.getMessage('noElementFound') || "未找到匹配的元素");
         }
 
         let targetElement = null;
@@ -227,7 +227,7 @@ function createQuickCopyButton(element, index) {
         }
 
         if (!targetElement) {
-          throw new Error("未找到包含图片的目标元素");
+          throw new Error(chrome.i18n.getMessage('noImageFound') || "未找到包含图片的目标元素");
         }
 
         const result = await copyImageFromElement(targetElement);
@@ -470,7 +470,7 @@ async function copyImageFromElement(element) {
     }
 
     if (!imgSrc) {
-      return { success: false, error: '未找到图片' };
+      return { success: false, error: chrome.i18n.getMessage('noImageFound') || '未找到图片' };
     }
 
     // 高亮显示图片
@@ -486,12 +486,12 @@ async function copyImageFromElement(element) {
     // 获取图片数据
     const response = await fetch(imgSrc);
     if (!response.ok) {
-      return { success: false, error: '无法下载图片' };
+      return { success: false, error: chrome.i18n.getMessage('downloadFailed') || '无法下载图片' };
     }
 
     const blob = await response.blob();
     if (!blob.type.startsWith('image/')) {
-      return { success: false, error: '不是有效的图片格式' };
+      return { success: false, error: chrome.i18n.getMessage('invalidImageFormat') || '不是有效的图片格式' };
     }
 
     // 复制到剪贴板
@@ -640,7 +640,7 @@ async function downloadAndCopyImage(imageUrl) {
 
     // 检查剪贴板API是否可用
     if (!navigator.clipboard) {
-      throw new Error('浏览器不支持剪贴板API');
+      throw new Error(chrome.i18n.getMessage('clipboardNotSupported') || '浏览器不支持剪贴板API');
     }
 
     // 获取图片数据

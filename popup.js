@@ -1,4 +1,35 @@
+// 国际化支持
+function initializeI18n() {
+  // 获取所有带有 data-i18n 属性的元素
+  const elements = document.querySelectorAll('[data-i18n]');
+  elements.forEach(element => {
+    const messageKey = element.getAttribute('data-i18n');
+    const message = chrome.i18n.getMessage(messageKey);
+    if (message) {
+      element.textContent = message;
+    }
+  });
+
+  // 处理带有 data-i18n-placeholder 属性的元素
+  const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+  placeholderElements.forEach(element => {
+    const messageKey = element.getAttribute('data-i18n-placeholder');
+    const message = chrome.i18n.getMessage(messageKey);
+    if (message) {
+      element.placeholder = message;
+    }
+  });
+}
+
+// 获取国际化文本的辅助函数
+function getMessage(key, substitutions) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  // 初始化国际化
+  initializeI18n();
+
   const tagNameInput = document.getElementById("tagName");
   const classSelectorInput = document.getElementById("classSelector");
   const saveTagBtn = document.getElementById("saveTag");
@@ -17,10 +48,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 加载自动复制模式设置
   loadAutoModeSettings();
-  
+
   // 加载快速复制模式设置
   loadQuickCopyModeSettings();
-  
+
   // 测试快速复制开关是否存在
   console.log("快速复制开关元素:", quickCopyModeSwitch);
   if (!quickCopyModeSwitch) {
@@ -34,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
       await saveAutoModeSettings(isEnabled);
 
       if (isEnabled) {
-        showStatus("自动复制模式已开启", "success");
+        showStatus(getMessage("autoModeEnabled") || "自动复制模式已开启", "success");
         // 如果开启自动模式且有默认标签，立即执行复制
         if (currentSelectedTag) {
           setTimeout(() => {
@@ -42,11 +73,11 @@ document.addEventListener("DOMContentLoaded", function () {
           }, 500);
         }
       } else {
-        showStatus("自动复制模式已关闭", "success");
+        showStatus(getMessage("autoModeDisabled") || "自动复制模式已关闭", "success");
       }
     } catch (error) {
       console.error("保存自动模式设置失败:", error);
-      showStatus("保存设置失败: " + error.message, "error");
+      showStatus((getMessage("saveSettingsFailed") || "保存设置失败: ") + error.message, "error");
     }
   });
 
@@ -57,27 +88,27 @@ document.addEventListener("DOMContentLoaded", function () {
       const isEnabled = quickCopyModeSwitch.checked;
       console.log("快速复制模式开关状态:", isEnabled);
       console.log("当前选中标签:", currentSelectedTag);
-      
+
       await saveQuickCopyModeSettings(isEnabled);
 
       if (isEnabled) {
-        showStatus("快速复制按钮已开启", "success");
+        showStatus(getMessage("quickCopyEnabled") || "快速复制按钮已开启", "success");
         // 如果有选中的标签，显示快速复制按钮
         if (currentSelectedTag) {
           console.log("开始显示快速复制按钮，选择器:", currentSelectedTag.selector);
           await showQuickCopyButtons(currentSelectedTag.selector);
         } else {
           console.log("没有选中的标签，无法显示快速复制按钮");
-          showStatus("请先选择一个标签", "error");
+          showStatus(getMessage("pleaseSelectTag") || "请先选择一个标签", "error");
         }
       } else {
-        showStatus("快速复制按钮已关闭", "success");
+        showStatus(getMessage("quickCopyDisabled") || "快速复制按钮已关闭", "success");
         // 隐藏快速复制按钮
         await hideQuickCopyButtons();
       }
     } catch (error) {
       console.error("保存快速复制模式设置失败:", error);
-      showStatus("保存设置失败: " + error.message, "error");
+              showStatus((getMessage("saveSettingsFailed") || "保存设置失败: ") + error.message, "error");
     }
   });
 
@@ -87,12 +118,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const selector = classSelectorInput.value.trim();
 
     if (!tagName) {
-      showStatus("请输入标签名称", "error");
+      showStatus(getMessage("pleaseEnterTagName") || "请输入标签名称", "error");
       return;
     }
 
     if (!selector) {
-      showStatus("请输入DOM节点选择器", "error");
+      showStatus(getMessage("pleaseEnterSelector") || "请输入DOM节点选择器", "error");
       return;
     }
 
@@ -106,11 +137,11 @@ document.addEventListener("DOMContentLoaded", function () {
       if (existingIndex >= 0) {
         // 更新现有标签
         savedTags[existingIndex] = { name: tagName, selector: selector };
-        showStatus(`标签 "${tagName}" 已更新`, "success");
+        showStatus(`${getMessage("tagUpdated") || "标签已更新"} "${tagName}"`, "success");
       } else {
         // 添加新标签
         savedTags.push({ name: tagName, selector: selector });
-        showStatus(`标签 "${tagName}" 已保存`, "success");
+        showStatus(`${getMessage("tagSaved") || "标签已保存"} "${tagName}"`, "success");
       }
 
       // 保存到存储
@@ -124,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
       classSelectorInput.value = "";
     } catch (error) {
       console.error("保存标签时出错:", error);
-      showStatus("保存失败: " + error.message, "error");
+      showStatus((getMessage("saveTagFailed") || "保存失败: ") + error.message, "error");
     }
   });
 
@@ -154,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (!selector) {
-      showStatus("请先选择一个标签或设置CSS选择器", "error");
+      showStatus(getMessage("pleaseSelectTagOrSetSelector") || "请先选择一个标签或设置CSS选择器", "error");
       return;
     }
 
@@ -164,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     try {
-      showStatus("正在查找和复制图片...", "success");
+      showStatus(getMessage("findingAndCopyingImage") || "正在查找和复制图片...", "success");
       console.log("开始处理复制请求，选择器:", selector);
 
       // 第一步：在页面中查找图片并获取图片数据
@@ -290,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (response && response.success) {
         // 第二步：在popup中复制图片到剪贴板
         try {
-          showStatus("正在复制图片到剪贴板...", "success");
+          showStatus(getMessage("copyingToClipboard") || "正在复制图片到剪贴板...", "success");
 
           // 将base64数据转换回blob
           const base64Data = response.imageData.split(",")[1];
@@ -308,13 +339,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }),
           ]);
 
-          showStatus(
-            `图片已成功复制到剪贴板！(找到 ${response.count} 张图片)`,
-            "success"
-          );
+                      showStatus(
+              (getMessage("showSuccessMessage") || "图片已成功复制到剪贴板！") + `(找到 ${response.count} 张图片)`,
+              "success"
+            );
         } catch (clipboardError) {
           console.error("剪贴板复制失败:", clipboardError);
-          showStatus("复制到剪贴板失败: " + clipboardError.message, "error");
+                      showStatus((getMessage("clipboardCopyFailed") || "复制到剪贴板失败: ") + clipboardError.message, "error");
         }
       } else {
         const errorMsg = response?.error || "复制失败，未知原因";
@@ -501,7 +532,7 @@ document.addEventListener("DOMContentLoaded", function () {
           showStatus(`已将 "${tag.name}" 设为默认标签`, "success");
         } catch (error) {
           console.error("设置默认标签失败:", error);
-          showStatus("设置默认标签失败: " + error.message, "error");
+          showStatus((getMessage("setDefaultTagFailed") || "设置默认标签失败: ") + error.message, "error");
         }
       });
 
@@ -526,7 +557,7 @@ document.addEventListener("DOMContentLoaded", function () {
             showStatus(`标签 "${tag.name}" 已删除`, "success");
           } catch (error) {
             console.error("删除标签失败:", error);
-            showStatus("删除失败: " + error.message, "error");
+            showStatus((getMessage("deleteFailed") || "删除失败: ") + error.message, "error");
           }
         }
       });
@@ -663,9 +694,9 @@ document.addEventListener("DOMContentLoaded", function () {
         action: "showQuickCopyButtons",
         selector: selector,
       });
-      
+
       if (response && !response.success) {
-        showStatus(response.error || "快速复制按钮显示失败", "error");
+        showStatus(response.error || getMessage("quickCopyButtonShowFailed") || "快速复制按钮显示失败", "error");
       } else if (response && response.success) {
         if (response.buttonCount > 0) {
           showStatus(`已显示 ${response.buttonCount} 个快速复制按钮`, "success");
@@ -680,7 +711,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (error.message.includes("Cannot access")) {
         showStatus("无法访问此页面，请在普通网页上使用此插件", "error");
       } else {
-        showStatus("显示快速复制按钮失败: " + error.message, "error");
+        showStatus((getMessage("showQuickCopyButtonFailed") || "显示快速复制按钮失败: ") + error.message, "error");
       }
     }
   }

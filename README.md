@@ -1,5 +1,7 @@
 # EasyImageCopy - 智能图片复制插件
 
+**中文** | **[English](README.en.md)**
+
 [![版本](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/roastwind/EasyImageCopy)
 [![许可证](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![支持的浏览器](https://img.shields.io/badge/Chrome-支持-brightgreen.svg)](https://www.google.com/chrome/)
@@ -14,6 +16,7 @@
 - **异步复制**：使用现代的 `Clipboard API` 和 `Fetch API`，以异步方式获取并复制图片，不会阻塞页面。
 - **优雅的UI反馈**：提供加载、成功、失败等清晰的视觉反馈，提升用户体验。
 - **健壮的错误处理**：包含了完善的重试和防循环机制，确保在复杂的单页应用（SPA）中也能稳定运行。
+- **多语言支持**：支持中文和英文界面，自动检测浏览器语言并显示对应界面。
 
 ## 🚀 安装方式
 
@@ -53,6 +56,15 @@
 - **Fetch API**: 异步获取图片资源。
 - **Clipboard API**: 安全地将图片数据写入用户剪贴板。
 - **CSS**: 实现按钮的样式和动画效果。
+- **国际化 (i18n)**: 支持中文和英文多语言界面。
+
+## 🌍 语言支持
+
+本插件支持多种语言：
+- **简体中文** - 默认语言
+- **English** - 完整的英文界面支持
+
+插件会自动检测你的浏览器语言并显示对应的界面。你也可以通过浏览器设置手动切换语言。
 
 ## 🤝 贡献指南
 

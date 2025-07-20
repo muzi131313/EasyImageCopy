@@ -1,0 +1,202 @@
+{
+  "extensionName": {
+    "message": "EasyImageCopy",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Select DOM elements and copy related images to clipboard",
+    "description": "Extension description"
+  },
+  "popupTitle": {
+    "message": "Image Copier",
+    "description": "Popup title"
+  },
+  "tagNameLabel": {
+    "message": "Tag Name:",
+    "description": "Tag name input label"
+  },
+  "tagNamePlaceholder": {
+    "message": "e.g.: Canvas Panel",
+    "description": "Tag name input placeholder"
+  },
+  "selectorLabel": {
+    "message": "DOM Selector:",
+    "description": "Selector input label"
+  },
+  "selectorPlaceholder": {
+    "message": "e.g.: div[data-testid=\"canvas_panel_container\"][data-visible=\"true\"] img",
+    "description": "Selector input placeholder"
+  },
+  "saveTagButton": {
+    "message": "Save Tag",
+    "description": "Save tag button text"
+  },
+  "savedTagsLabel": {
+    "message": "Saved Tags:",
+    "description": "Saved tags area label"
+  },
+  "autoModeLabel": {
+    "message": "Auto Copy Mode",
+    "description": "Auto mode switch label"
+  },
+  "autoModeDescription": {
+    "message": "When enabled, automatically copy image using default tag when opening extension",
+    "description": "Auto mode switch description"
+  },
+  "quickCopyModeLabel": {
+    "message": "Quick Copy Button",
+    "description": "Quick copy mode switch label"
+  },
+  "quickCopyModeDescription": {
+    "message": "Show quick copy button on target element, click to copy image",
+    "description": "Quick copy mode switch description"
+  },
+  "currentSelectionLabel": {
+    "message": "Current Selection:",
+    "description": "Current selection display label"
+  },
+  "copyImageButton": {
+    "message": "Copy Image",
+    "description": "Copy image button text"
+  },
+  "quickCopyButtonTitle": {
+    "message": "Quick copy image",
+    "description": "Quick copy button tooltip text"
+  },
+  "copySuccess": {
+    "message": "Image copied successfully!",
+    "description": "Copy success message"
+  },
+  "copyFailed": {
+    "message": "Copy failed:",
+    "description": "Copy failed message prefix"
+  },
+  "noImageFound": {
+    "message": "No image found",
+    "description": "No image found error"
+  },
+  "noElementFound": {
+    "message": "No matching elements found",
+    "description": "No element found error"
+  },
+  "selectorEmpty": {
+    "message": "Selector is empty, cannot find target element",
+    "description": "Empty selector error"
+  },
+  "invalidImageFormat": {
+    "message": "Invalid image format",
+    "description": "Invalid image format error"
+  },
+  "downloadFailed": {
+    "message": "Failed to download image",
+    "description": "Download image failed error"
+  },
+  "clipboardNotSupported": {
+    "message": "Browser does not support clipboard API",
+    "description": "Clipboard API not supported error"
+  },
+  "tagSaveSuccess": {
+    "message": "Tag saved successfully!",
+    "description": "Tag save success message"
+  },
+  "tagSaveFailed": {
+    "message": "Please fill in tag name and selector",
+    "description": "Tag save failed message"
+  },
+  "processing": {
+    "message": "Processing...",
+    "description": "Processing message"
+  },
+  "showQuickCopyButtons": {
+    "message": "Show Quick Copy Buttons",
+    "description": "Show quick copy buttons action"
+  },
+  "hideQuickCopyButtons": {
+    "message": "Hide Quick Copy Buttons",
+    "description": "Hide quick copy buttons action"
+  },
+  "autoModeEnabled": {
+    "message": "Auto copy mode enabled",
+    "description": "Auto mode enabled message"
+  },
+  "autoModeDisabled": {
+    "message": "Auto copy mode disabled",
+    "description": "Auto mode disabled message"
+  },
+  "quickCopyEnabled": {
+    "message": "Quick copy button enabled",
+    "description": "Quick copy mode enabled message"
+  },
+  "quickCopyDisabled": {
+    "message": "Quick copy button disabled",
+    "description": "Quick copy mode disabled message"
+  },
+  "pleaseSelectTag": {
+    "message": "Please select a tag first",
+    "description": "Please select tag message"
+  },
+  "saveSettingsFailed": {
+    "message": "Failed to save settings:",
+    "description": "Save settings failed prefix"
+  },
+  "pleaseEnterTagName": {
+    "message": "Please enter tag name",
+    "description": "Please enter tag name message"
+  },
+  "pleaseEnterSelector": {
+    "message": "Please enter DOM selector",
+    "description": "Please enter selector message"
+  },
+  "tagUpdated": {
+    "message": "Tag updated",
+    "description": "Tag updated success message"
+  },
+  "tagSaved": {
+    "message": "Tag saved",
+    "description": "Tag saved success message"
+  },
+  "saveTagFailed": {
+    "message": "Save failed:",
+    "description": "Save tag failed prefix"
+  },
+  "pleaseSelectTagOrSetSelector": {
+    "message": "Please select a tag or set CSS selector first",
+    "description": "Please select tag or set selector message"
+  },
+  "findingAndCopyingImage": {
+    "message": "Finding and copying image...",
+    "description": "Finding and copying image in progress message"
+  },
+  "copyingToClipboard": {
+    "message": "Copying image to clipboard...",
+    "description": "Copying to clipboard in progress message"
+  },
+  "showSuccessMessage": {
+    "message": "Image successfully copied to clipboard!",
+    "description": "Copy success detailed message"
+  },
+  "copyFailedMessage": {
+    "message": "Failed to copy image:",
+    "description": "Copy failed message prefix"
+  },
+  "clipboardCopyFailed": {
+    "message": "Failed to copy to clipboard:",
+    "description": "Clipboard copy failed prefix"
+  },
+  "setDefaultTagFailed": {
+    "message": "Failed to set default tag:",
+    "description": "Set default tag failed prefix"
+  },
+  "deleteFailed": {
+    "message": "Delete failed:",
+    "description": "Delete failed prefix"
+  },
+  "quickCopyButtonShowFailed": {
+    "message": "Quick copy button display failed",
+    "description": "Quick copy button display failed message"
+  },
+  "showQuickCopyButtonFailed": {
+    "message": "Failed to show quick copy button:",
+    "description": "Show quick copy button failed prefix"
+  }
+}

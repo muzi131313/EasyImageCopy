@@ -269,26 +269,27 @@
     </style>
   </head>
   <body>
-    <h3>图片复制器</h3>
+    <h3 data-i18n="popupTitle">图片复制器</h3>
 
     <div class="input-group">
-      <label for="tagName">标签名称:</label>
-      <input type="text" id="tagName" placeholder="例如: Canvas面板" />
+      <label for="tagName" data-i18n="tagNameLabel">标签名称:</label>
+      <input type="text" id="tagName" data-i18n-placeholder="tagNamePlaceholder" placeholder="例如: Canvas面板" />
     </div>
 
     <div class="input-group">
-      <label for="classSelector">DOM节点选择器:</label>
+      <label for="classSelector" data-i18n="selectorLabel">DOM节点选择器:</label>
       <input
         type="text"
         id="classSelector"
+        data-i18n-placeholder="selectorPlaceholder"
         placeholder='例如: div[data-testid="canvas_panel_container"][data-visible="true"] img'
       />
     </div>
 
-    <button id="saveTag" class="button save-button">保存标签</button>
+    <button id="saveTag" class="button save-button" data-i18n="saveTagButton">保存标签</button>
 
     <div class="input-group">
-      <label>已保存的标签:</label>
+      <label data-i18n="savedTagsLabel">已保存的标签:</label>
       <div id="savedTags" class="saved-tags">
         <!-- 保存的标签会显示在这里 -->
       </div>
@@ -298,9 +299,9 @@
       <label class="switch-container">
         <input type="checkbox" id="autoMode" class="switch-input" />
         <span class="switch-slider"></span>
-        <span class="switch-label">自动复制模式</span>
+        <span class="switch-label" data-i18n="autoModeLabel">自动复制模式</span>
       </label>
-      <div class="switch-description">
+      <div class="switch-description" data-i18n="autoModeDescription">
         开启后，打开插件时自动使用默认标签复制图片
       </div>
     </div>
@@ -309,18 +310,18 @@
       <label class="switch-container">
         <input type="checkbox" id="quickCopyMode" class="switch-input" />
         <span class="switch-slider"></span>
-        <span class="switch-label">快速复制按钮</span>
+        <span class="switch-label" data-i18n="quickCopyModeLabel">快速复制按钮</span>
       </label>
-      <div class="switch-description">
+      <div class="switch-description" data-i18n="quickCopyModeDescription">
         在目标元素上显示快速复制按钮，点击即可复制图片
       </div>
     </div>
 
     <div id="currentSetting" class="current-setting" style="display: none">
-      <strong>当前选择:</strong> <span id="currentSelector"></span>
+      <strong data-i18n="currentSelectionLabel">当前选择:</strong> <span id="currentSelector"></span>
     </div>
 
-    <button id="copyImage" class="button copy-button" disabled>复制图片</button>
+    <button id="copyImage" class="button copy-button" disabled data-i18n="copyImageButton">复制图片</button>
 
     <div id="status"></div>
     <script src="popup.js"></script>

@@ -266,6 +266,22 @@
         padding-left: 0;
         clear: both;
       }
+      .language-select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background-color: white;
+        margin-top: 5px;
+        cursor: pointer;
+      }
+      .language-select:focus {
+        outline: none;
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      }
     </style>
   </head>
   <body>
@@ -314,6 +330,18 @@
       </label>
       <div class="switch-description" data-i18n="quickCopyModeDescription">
         在目标元素上显示快速复制按钮，点击即可复制图片
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="languageSelect" data-i18n="languageSettingLabel">界面语言:</label>
+      <select id="languageSelect" class="language-select">
+        <option value="auto" data-i18n="languageAuto">跟随浏览器</option>
+        <option value="zh_CN" data-i18n="languageChinese">中文</option>
+        <option value="en" data-i18n="languageEnglish">English</option>
+      </select>
+      <div class="switch-description" data-i18n="languageSettingDescription">
+        选择插件界面显示的语言
       </div>
     </div>
 

@@ -198,5 +198,33 @@
   "showQuickCopyButtonFailed": {
     "message": "显示快速复制按钮失败:",
     "description": "显示快速复制按钮失败前缀"
+  },
+  "languageSettingLabel": {
+    "message": "界面语言",
+    "description": "语言设置标签"
+  },
+  "languageSettingDescription": {
+    "message": "选择插件界面显示的语言",
+    "description": "语言设置描述"
+  },
+  "languageChinese": {
+    "message": "中文",
+    "description": "中文语言选项"
+  },
+  "languageEnglish": {
+    "message": "English",
+    "description": "英文语言选项"
+  },
+  "languageAuto": {
+    "message": "跟随浏览器",
+    "description": "自动语言选项"
+  },
+  "languageChanged": {
+    "message": "语言设置已更改",
+    "description": "语言切换成功提示"
+  },
+  "languageChangeFailed": {
+    "message": "语言切换失败:",
+    "description": "语言切换失败前缀"
   }
 }

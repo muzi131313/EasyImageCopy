@@ -198,5 +198,33 @@
   "showQuickCopyButtonFailed": {
     "message": "Failed to show quick copy button:",
     "description": "Show quick copy button failed prefix"
+  },
+  "languageSettingLabel": {
+    "message": "Interface Language",
+    "description": "Language setting label"
+  },
+  "languageSettingDescription": {
+    "message": "Choose the display language for the extension interface",
+    "description": "Language setting description"
+  },
+  "languageChinese": {
+    "message": "中文",
+    "description": "Chinese language option"
+  },
+  "languageEnglish": {
+    "message": "English",
+    "description": "English language option"
+  },
+  "languageAuto": {
+    "message": "Follow Browser",
+    "description": "Auto language option"
+  },
+  "languageChanged": {
+    "message": "Language setting changed",
+    "description": "Language change success message"
+  },
+  "languageChangeFailed": {
+    "message": "Failed to change language:",
+    "description": "Language change failed prefix"
   }
 }

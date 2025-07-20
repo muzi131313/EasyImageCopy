@@ -1,10 +1,50 @@
+// 语言包存储
+let currentLanguagePack = null;
+
+// 加载指定语言的语言包
+async function loadLanguagePack(locale) {
+  try {
+    const response = await fetch(`_locales/${locale}/messages.json`);
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (error) {
+    console.log(`无法加载语言包 ${locale}:`, error);
+  }
+  return null;
+}
+
+// 获取当前应使用的语言
+async function getCurrentLanguage() {
+  const result = await chrome.storage.local.get(['userLanguage']);
+  const userLanguage = result.userLanguage || 'auto';
+
+  if (userLanguage === 'auto') {
+    // 跟随浏览器语言
+    const browserLang = chrome.i18n.getUILanguage();
+    return browserLang.startsWith('zh') ? 'zh_CN' : 'en';
+  }
+
+  return userLanguage;
+}
+
 // 国际化支持
-function initializeI18n() {
+async function initializeI18n() {
+  const currentLang = await getCurrentLanguage();
+
+  // 尝试加载用户选择的语言包
+  currentLanguagePack = await loadLanguagePack(currentLang);
+
+  // 如果加载失败，回退到浏览器默认语言包
+  if (!currentLanguagePack) {
+    currentLanguagePack = null; // 使用 chrome.i18n.getMessage
+  }
+
   // 获取所有带有 data-i18n 属性的元素
   const elements = document.querySelectorAll('[data-i18n]');
   elements.forEach(element => {
     const messageKey = element.getAttribute('data-i18n');
-    const message = chrome.i18n.getMessage(messageKey);
+    const message = getLocalizedMessage(messageKey);
     if (message) {
       element.textContent = message;
     }
@@ -14,21 +54,40 @@ function initializeI18n() {
   const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
   placeholderElements.forEach(element => {
     const messageKey = element.getAttribute('data-i18n-placeholder');
-    const message = chrome.i18n.getMessage(messageKey);
+    const message = getLocalizedMessage(messageKey);
     if (message) {
       element.placeholder = message;
     }
   });
+
+  // 处理 select 选项的国际化
+  const selectOptions = document.querySelectorAll('option[data-i18n]');
+  selectOptions.forEach(option => {
+    const messageKey = option.getAttribute('data-i18n');
+    const message = getLocalizedMessage(messageKey);
+    if (message) {
+      option.textContent = message;
+    }
+  });
+}
+
+// 获取本地化消息
+function getLocalizedMessage(key) {
+  if (currentLanguagePack && currentLanguagePack[key]) {
+    return currentLanguagePack[key].message;
+  }
+  // 回退到浏览器默认的国际化API
+  return chrome.i18n.getMessage(key);
 }
 
 // 获取国际化文本的辅助函数
 function getMessage(key, substitutions) {
-  return chrome.i18n.getMessage(key, substitutions);
+  return getLocalizedMessage(key, substitutions);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   // 初始化国际化
-  initializeI18n();
+  await initializeI18n();
 
   const tagNameInput = document.getElementById("tagName");
   const classSelectorInput = document.getElementById("classSelector");
@@ -40,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const savedTagsDiv = document.getElementById("savedTags");
   const autoModeSwitch = document.getElementById("autoMode");
   const quickCopyModeSwitch = document.getElementById("quickCopyMode");
+  const languageSelect = document.getElementById("languageSelect");
 
   let currentSelectedTag = null;
 
@@ -49,8 +109,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // 加载自动复制模式设置
   loadAutoModeSettings();
 
-  // 加载快速复制模式设置
+    // 加载快速复制模式设置
   loadQuickCopyModeSettings();
+
+  // 加载语言设置
+  loadLanguageSettings();
 
   // 测试快速复制开关是否存在
   console.log("快速复制开关元素:", quickCopyModeSwitch);
@@ -109,6 +172,22 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
       console.error("保存快速复制模式设置失败:", error);
               showStatus((getMessage("saveSettingsFailed") || "保存设置失败: ") + error.message, "error");
+    }
+  });
+
+  // 语言切换事件
+  languageSelect.addEventListener("change", async function () {
+    try {
+      const selectedLanguage = languageSelect.value;
+      await saveLanguageSettings(selectedLanguage);
+
+      // 重新初始化国际化
+      await initializeI18n();
+
+      showStatus(getMessage("languageChanged") || "语言设置已更改", "success");
+    } catch (error) {
+      console.error("切换语言失败:", error);
+      showStatus((getMessage("languageChangeFailed") || "语言切换失败: ") + error.message, "error");
     }
   });
 
@@ -727,10 +806,30 @@ document.addEventListener("DOMContentLoaded", function () {
       await chrome.tabs.sendMessage(tab.id, {
         action: "hideQuickCopyButtons",
       });
-    } catch (error) {
-      console.error("隐藏快速复制按钮失败:", error);
-    }
+      } catch (error) {
+    console.error("隐藏快速复制按钮失败:", error);
   }
+}
+
+// 加载语言设置
+async function loadLanguageSettings() {
+  try {
+    const result = await chrome.storage.local.get(['userLanguage']);
+    const userLanguage = result.userLanguage || 'auto';
+    languageSelect.value = userLanguage;
+  } catch (error) {
+    console.error("加载语言设置失败:", error);
+  }
+}
+
+// 保存语言设置
+async function saveLanguageSettings(language) {
+  try {
+    await chrome.storage.local.set({ userLanguage: language });
+  } catch (error) {
+    console.error("保存语言设置失败:", error);
+  }
+}
 
   function showStatus(message, type) {
     statusDiv.textContent = message;

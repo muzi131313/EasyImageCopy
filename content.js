@@ -504,10 +504,13 @@ async function copyImageFromElement(element) {
       return { success: false, error: safeGetMessage('invalidImageFormat') || '不是有效的图片格式' };
     }
 
+    // 转换为浏览器支持的格式
+    const supportedBlob = await convertImageToSupportedFormat(blob);
+
     // 复制到剪贴板
     await navigator.clipboard.write([
       new ClipboardItem({
-        [blob.type]: blob
+        [supportedBlob.type]: supportedBlob
       })
     ]);
 
@@ -643,6 +646,46 @@ function highlightElement(element) {
   }, 3000);
 }
 
+// 将图片转换为浏览器支持的格式
+async function convertImageToSupportedFormat(blob) {
+  // 浏览器支持的剪贴板图片格式
+  const supportedFormats = ['image/png', 'image/jpeg', 'image/gif', 'image/bmp'];
+
+  if (supportedFormats.includes(blob.type)) {
+    return blob;
+  }
+
+  console.log(`图片格式 ${blob.type} 不被剪贴板支持，正在转换为 PNG...`);
+
+  // 创建 canvas 来转换图片格式
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+
+  return new Promise((resolve, reject) => {
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      canvas.toBlob((pngBlob) => {
+        if (pngBlob) {
+          console.log('图片已成功转换为 PNG 格式');
+          resolve(pngBlob);
+        } else {
+          reject(new Error('图片格式转换失败'));
+        }
+      }, 'image/png');
+    };
+
+    img.onerror = () => {
+      reject(new Error('无法加载图片进行格式转换'));
+    };
+
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
 // 下载图片并复制到剪贴板
 async function downloadAndCopyImage(imageUrl) {
   try {
@@ -672,11 +715,14 @@ async function downloadAndCopyImage(imageUrl) {
       throw new Error(`不是有效的图片格式: ${blob.type}`);
     }
 
+    // 转换为浏览器支持的格式
+    const supportedBlob = await convertImageToSupportedFormat(blob);
+
     // 复制到剪贴板
     console.log("开始复制到剪贴板...");
     await navigator.clipboard.write([
       new ClipboardItem({
-        [blob.type]: blob
+        [supportedBlob.type]: supportedBlob
       })
     ]);
 
